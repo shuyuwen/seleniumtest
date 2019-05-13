@@ -1,0 +1,75 @@
+<project name="ApexTest" default="runTask" basedir=".">
+
+    <property name="src" location="src"/>
+    <property name="lib" location="lib"/>
+    <property name="build" location="bin"/>
+
+    <path id="classpath">
+        <pathelement location="${bin}" />
+    	<fileset dir="${lib}">
+      	    <include name="*.jar" />
+    	</fileset>
+    </path>
+
+    <target name="clean">
+        <echo>Clean up</echo>
+        <delete dir="${build}"/>
+    </target>
+
+
+    <target name="init" depends="clean">
+        <echo>Create build directory</echo>
+        <mkdir dir="${build}"/>
+    </target>
+
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${build}" includeantruntime="false">
+            <classpath>
+                <fileset dir="${lib}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="runTask">
+        <sequential>
+            <echo>Step 1: Clean up env</echo>
+            <delete dir="${build}"/>
+
+            <echo>Step 2: Create build directory</echo>
+            <mkdir dir="${build}"/>
+            <copy tofile="${build}/testng.xml" file="testng.xml" verbose="true" />
+            <copy todir="${build}/">
+                <fileset dir="${src}/">
+                    <include name="*.xml" />
+                </fileset>
+            </copy> 
+
+            <echo>Step 3: Compile</echo>
+            <javac srcdir="${src}" destdir="${build}" includeantruntime="false">
+                <classpath>
+                    <fileset dir="${lib}">
+                        <include name="**/*.jar"/>
+                    </fileset>
+                </classpath>
+            </javac>
+
+
+            <taskdef name="testng" classname="org.testng.TestNGAntTask" classpathref="classpath"/>
+
+            <echo>Step 4: Run task</echo>
+            <testng  >
+                <classpath>
+                    <pathelement path="${build}"/>
+                    <fileset dir="${lib}">
+                        <include name="**/*.jar"/>
+                    </fileset>
+                </classpath>
+                <xmlfileset dir="." includes="testng.xml" />
+            </testng>
+
+        </sequential>
+    </target>
+</project>
